@@ -26,7 +26,7 @@ void should_return_correct_parsed_core_struct(void){
     assert(cpu.guest == 0);
     assert(cpu.guest_nice == 0);
 
-    printf("TEST PASSED: should_return_correct_parsed_cpu_struct\n");
+    printf("TEST PASSED: should_return_correct_parsed_core_struct\n");
 }
 
 void should_compute_cpu_usage(void){
