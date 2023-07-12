@@ -4,8 +4,10 @@ CC := clang
 
 SRCS = src/main.c
 SRCS += src/cpu/cpu.c
+SRCS += src/reader/reader.c
 
-INCLUDES += -Isrc/cpu/
+INCLUDES = -Isrc/cpu/
+INCLUDES += -Isrc/reader/
 
 TESTS = tests/tests.c
 TESTS += -Itests/
