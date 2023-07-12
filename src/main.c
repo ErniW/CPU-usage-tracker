@@ -1,28 +1,16 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 int main(){
 
+
     #ifdef DEBUG
-        printf("Hello from debug!\n");
-    #else
-        printf("Hello from build!\n");
+        printf("\nStarting tests:\n\n");
+        should_return_global_cpu_id();
+        should_return_correct_parsed_cpu_struct();
+        printf("\033[0;32mALL TESTS PASSED\033[0m\n");
     #endif
 
-    FILE* data = fopen("/proc/stat", "r");
-    if(data == NULL){
-        perror("Error opening file");
-        fclose(data);
-        return 1;
-    }
-
-    char line[256];
-    while(fgets(line, sizeof(line), data) != NULL && strncmp(line, "cpu", 3) == 0){
-        printf("%s", line);
-    }
-
-    fclose(data);
+    CPU_readUsage();
 
     return 0;
 }
