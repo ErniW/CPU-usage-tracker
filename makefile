@@ -6,10 +6,13 @@ SRCS = src/main.c
 SRCS += src/cpu/cpu.c
 SRCS += src/reader/reader.c
 SRCS += src/analyzer/analyzer.c
+SRCS += src/printer/printer.c
+
 
 INCLUDES = -Isrc/cpu/
 INCLUDES += -Isrc/reader/
 INCLUDES += -Isrc/analyzer/
+INCLUDES += -Isrc/printer/
 
 TESTS = tests/tests.c
 TESTS += -Itests/

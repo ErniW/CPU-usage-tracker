@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 struct CPU_core{
     long long id;
@@ -26,6 +27,13 @@ struct CPU_state{
 };
 
 typedef struct CPU_state CPU_state;
+
+// struct CPU_globalState{
+
+// };
+
+// typedef struct CPU_globalstate CPU_globalstate;
+
 
 void CPU_readUsage(CPU_state* state);
 CPU_core CPU_parseUsage(char* line);

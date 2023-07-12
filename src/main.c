@@ -2,6 +2,7 @@
 #include <cpu.h>
 #include <reader.h>
 #include <analyzer.h>
+#include <printer.h>
 
 #ifdef DEBUG
     #include <tests.h>
@@ -14,11 +15,14 @@
 
 pthread_t readerThread;
 pthread_t analyzerThread;
+pthread_t printerThread;
 
 pthread_mutex_t access_mtx = PTHREAD_MUTEX_INITIALIZER;
 CPU_state state;
 CPU_state prevState;
+unsigned int usage = 0;
 pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
+
 
 volatile __sig_atomic_t exitFlag = 0;
 
@@ -46,9 +50,11 @@ int main(){
 
     pthread_create(&readerThread, NULL, readerFunction, NULL);
     pthread_create(&analyzerThread, NULL, analyzerFunction, NULL);
+    pthread_create(&printerThread, NULL, printerFunction, NULL);
 
     pthread_join(readerThread, NULL);
     pthread_join(analyzerThread, NULL);
+    pthread_join(printerThread, NULL);
 
     free(state.cores);
 

@@ -5,6 +5,7 @@ extern pthread_mutex_t access_mtx;
 extern CPU_state state;
 extern CPU_state prevState;
 extern pthread_cond_t condition;
+extern unsigned int usage;
 
 #include <stdbool.h>
 
@@ -22,15 +23,15 @@ void* analyzerFunction(void* args){
             isInit = true;
         }
         else{
-             unsigned int usage = CPU_getAverageUsage(&prevState.total, &state.total);
+            usage = CPU_getAverageUsage(&prevState.total, &state.total);
 
-            printf("%u\n", usage);
-            prevState = state;
+            // printf("%u\n", usage);
+            
         }
         
          pthread_mutex_unlock(&access_mtx);
        
-        sleep(2);
+        usleep(10000);
     }
 
     pthread_exit(NULL);
