@@ -1,6 +1,6 @@
 #include "cpu.h"
 
-void CPU_readUsage(){
+void CPU_readUsage(void){
     FILE* data = fopen("/proc/stat", "r");
     if(data == NULL){
         perror("Error opening file");
@@ -40,4 +40,35 @@ CPU_core CPU_parseUsage(char* line){
         sscanf(prefix, "cpu%lld", &core.id);
 
     return core;
+}
+
+unsigned int CPU_getAverageUsage(CPU_core *prev, CPU_core *next){
+
+    unsigned long prevIdle      = prev->idle + prev->iowait;
+    unsigned long prevActive    = prev->user
+                                + prev->nice
+                                + prev->system
+                                + prev->irq
+                                + prev->softirq
+                                + prev->steal;
+
+    unsigned long currentIdle   = next->idle + next->iowait;
+    unsigned long currentActive = next->user
+                                + next->nice
+                                + next->system
+                                + next->irq
+                                + next->softirq
+                                + next->steal;
+
+    unsigned long prevTotal     = prevIdle + prevActive;
+    unsigned long currentTotal  = currentIdle + currentActive;
+
+    unsigned long totalDiff     = currentTotal - prevTotal;
+    unsigned long idleDiff      = currentIdle - prevIdle;
+
+     
+
+    unsigned int cpuPercentage  = (totalDiff - idleDiff) * 100 / totalDiff;
+
+    return cpuPercentage;
 }

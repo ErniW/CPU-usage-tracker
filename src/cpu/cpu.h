@@ -20,5 +20,7 @@ struct CPU_core{
 
 typedef struct CPU_core CPU_core;
 
-void CPU_readUsage();
+void CPU_readUsage(void);
 CPU_core CPU_parseUsage(char* line);
+
+unsigned int CPU_getAverageUsage(CPU_core* prev, CPU_core* next);
