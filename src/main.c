@@ -14,26 +14,33 @@
 #include <signal.h>
 #include <unistd.h>
 
+extern CPU_usage usageTracker;
+extern Queue CPU_stateBuffer;
+extern pthread_t readerThread;
+extern pthread_t analyzerThread;
+extern pthread_t printerThread;
+extern int NUM_CORES;
+
+
 pthread_t readerThread;
 pthread_t analyzerThread;
 pthread_t printerThread;
 
 CPU_usage usageTracker;
-
 Queue CPU_stateBuffer;
 
 int NUM_CORES;
 
 int main(){
 
-    NUM_CORES = sysconf(_SC_NPROCESSORS_ONLN);
+    NUM_CORES = (int)sysconf(_SC_NPROCESSORS_ONLN);
 
-    usageTracker.prev = (CPU_state*)malloc(NUM_CORES * sizeof(CPU_state));
-    usageTracker.current= (CPU_state*)malloc(NUM_CORES * sizeof(CPU_state));
-    usageTracker.prev->cores = (CPU_core*)malloc(8 * sizeof(CPU_core));
-    usageTracker.current->cores = (CPU_core*)malloc(8 * sizeof(CPU_core));
-    usageTracker.coreValue = (unsigned int*)malloc(8 * sizeof(unsigned int));
-
+    usageTracker.prev = (CPU_state*)malloc((unsigned long)NUM_CORES * sizeof(CPU_state));
+    usageTracker.current= (CPU_state*)malloc((unsigned long)NUM_CORES * sizeof(CPU_state));
+    usageTracker.prev->cores = (CPU_core*)malloc((unsigned long)NUM_CORES * sizeof(CPU_core));
+    usageTracker.current->cores = (CPU_core*)malloc((unsigned long)NUM_CORES * sizeof(CPU_core));
+    usageTracker.coreValue = (unsigned int*)malloc((unsigned long)NUM_CORES * sizeof(unsigned int));
+    usageTracker.isInit = false;
 
 
     Queue_init(&CPU_stateBuffer);
@@ -50,17 +57,23 @@ int main(){
     signal(SIGINT, handleSIGINT);
 
     pthread_create(&readerThread, NULL, readerFunction, NULL);
-    pthread_create(&analyzerThread, NULL, analyzerFunction, NULL);
-    pthread_create(&printerThread, NULL, printerFunction, NULL);
+     pthread_create(&analyzerThread, NULL, analyzerFunction, NULL);
+     pthread_create(&printerThread, NULL, printerFunction, NULL);
 
     pthread_join(readerThread, NULL);
-    pthread_join(analyzerThread, NULL);
-    pthread_join(printerThread, NULL);
+     pthread_join(analyzerThread, NULL);
+     pthread_join(printerThread, NULL);
     
 
     for (int i = 0; i < BUFFER_SIZE; i++) {
         free(CPU_stateBuffer.buffer[i].cores);
     }
 
+    //free(usageTracker.current->cores);
+    free(usageTracker.prev->cores);
+    free(usageTracker.current);
+    free(usageTracker.prev);
+    free(usageTracker.coreValue);
+    // free(usageTracker);
     return 0;
 }

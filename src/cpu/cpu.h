@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 struct CPU_core{
     long long id;
@@ -31,6 +32,7 @@ typedef struct CPU_state CPU_state;
 struct CPU_usage{
     CPU_state* prev;
     CPU_state* current;
+    bool isInit;
     unsigned int total;
     unsigned int* coreValue;
 };

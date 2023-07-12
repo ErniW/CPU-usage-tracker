@@ -15,13 +15,13 @@ void* printerFunction(void* args){
 
         printf("%u - \t", usageTracker.total);
 
-         for(int i=0; i<NUM_CORES; i++){
+        for(int i=0; i<NUM_CORES; i++){
             printf("%u \t", usageTracker.coreValue[i]);
+            usageTracker.prev->cores[i] = usageTracker.current->cores[i];
         }
         printf("\n");
 
-        memcpy(usageTracker.prev->cores, usageTracker.current->cores, 8 * sizeof(CPU_core));
-         usageTracker.prev->total = usageTracker.current->total;
+        usageTracker.prev->total = usageTracker.current->total;
 
         pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
        
