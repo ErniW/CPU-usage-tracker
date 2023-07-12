@@ -1,7 +1,7 @@
 #include <cpu.h>
 #include "tests.h"
 
-extern NUM_CORES;
+extern int NUM_CORES;
 
 void should_return_total_cpu_id(void){
 
@@ -47,7 +47,7 @@ void should_return_correct_parsed_cpu_state_struct(void){
 
     CPU_state state;
 
-    state.cores = malloc(sizeof(CPU_core) * NUM_CORES);
+    state.cores = malloc(sizeof(CPU_core) * (unsigned long)NUM_CORES);
     
     CPU_readUsage(&state);
 
