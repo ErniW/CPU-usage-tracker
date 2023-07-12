@@ -10,7 +10,7 @@ void should_return_total_cpu_id(void){
     printf("TEST PASSED: should_return_global_cpu_id\n");
 }
 
-void should_return_correct_parsed_cpu_struct(void){
+void should_return_correct_parsed_core_struct(void){
 
     CPU_core cpu = CPU_parseUsage(CORE_CPU_MOCK);
 
@@ -39,4 +39,23 @@ void should_compute_cpu_usage(void){
     assert(usage == 50);
 
     printf("TEST PASSED: should_compute_cpu_usage\n");
+}
+
+void should_return_correct_parsed_cpu_state_struct(void){
+
+    CPU_state state;
+    int numCores = 8;
+
+    state.cores = malloc(sizeof(CPU_core) * numCores);
+    
+    CPU_readUsage(&state);
+
+    assert(state.total.id == -1);
+    for(int i=0; i<numCores; i++){
+        assert(state.cores[i].id == i);
+    }
+    
+    free(state.cores);
+
+    printf("TEST PASSED: should_return_correct_parsed_cpu_state_struct\n");
 }

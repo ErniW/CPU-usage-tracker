@@ -8,12 +8,13 @@ int main(){
     #ifdef DEBUG
         printf("\nStarting tests:\n\n");
         should_return_total_cpu_id();
-        should_return_correct_parsed_cpu_struct();
+        should_return_correct_parsed_core_struct();
+        should_return_correct_parsed_cpu_state_struct();
         should_compute_cpu_usage();
         printf("\033[0;32mALL TESTS PASSED\033[0m\n");
     #endif
 
-    CPU_readUsage();
+    //CPU_readUsage();
 
     return 0;
 }

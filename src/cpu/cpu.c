@@ -1,6 +1,6 @@
 #include "cpu.h"
 
-void CPU_readUsage(void){
+void CPU_readUsage(CPU_state* state){
     FILE* data = fopen("/proc/stat", "r");
     if(data == NULL){
         perror("Error opening file");
@@ -10,7 +10,19 @@ void CPU_readUsage(void){
 
     char line[256];
     while(fgets(line, sizeof(line), data) != NULL && strncmp(line, "cpu", 3) == 0){
-        printf("%s", line);
+        // printf("%s", line);
+
+        CPU_core core = CPU_parseUsage(line);
+
+        if(core.id == -1){
+            state->total = core;
+        }
+        else{
+            state->cores[core.id] = core;
+        }
+
+        
+        
     }
 
     fclose(data);

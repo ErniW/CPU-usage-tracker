@@ -17,6 +17,7 @@
 #define CURRENT_CPU_MOCK    "cpu0 400 400 400 2000 400 400 400 400 0 0"
 
 void should_return_total_cpu_id(void);
-void should_return_correct_parsed_cpu_struct(void);
+void should_return_correct_parsed_core_struct(void);
+void should_return_correct_parsed_cpu_state_struct(void);
 
 void should_compute_cpu_usage(void);
