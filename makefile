@@ -7,12 +7,14 @@ SRCS += src/cpu/cpu.c
 SRCS += src/reader/reader.c
 SRCS += src/analyzer/analyzer.c
 SRCS += src/printer/printer.c
+SRCS += src/queue/queue.c
 
 
 INCLUDES = -Isrc/cpu/
 INCLUDES += -Isrc/reader/
 INCLUDES += -Isrc/analyzer/
 INCLUDES += -Isrc/printer/
+INCLUDES += -Isrc/queue/
 
 TESTS = tests/tests.c
 TESTS += -Itests/

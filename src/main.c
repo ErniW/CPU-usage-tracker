@@ -1,8 +1,8 @@
-
 #include <cpu.h>
 #include <reader.h>
 #include <analyzer.h>
 #include <printer.h>
+#include <queue.h>
 
 #ifdef DEBUG
     #include <tests.h>
@@ -26,6 +26,8 @@ pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
 
 volatile __sig_atomic_t exitFlag = 0;
 
+Queue CPU_stateBuffer;
+
 void handleSIGINT(int signal) {
     printf("[SIGINT %d] received. Exiting...\n", signal);
     exitFlag = 1;
@@ -34,8 +36,9 @@ void handleSIGINT(int signal) {
 int main(){
 
     int coresAmount = sysconf(_SC_NPROCESSORS_ONLN);
-    state.cores = malloc(sizeof(CPU_core) * coresAmount);
+   // state.cores = malloc(sizeof(CPU_core) * coresAmount);
 
+    Queue_init(&CPU_stateBuffer);
 
     #ifdef DEBUG
         printf("\nStarting tests:\n\n");
@@ -55,8 +58,11 @@ int main(){
     pthread_join(readerThread, NULL);
     pthread_join(analyzerThread, NULL);
     pthread_join(printerThread, NULL);
+    
 
-    free(state.cores);
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        free(CPU_stateBuffer.buffer[i].cores);
+    }
 
     return 0;
 }

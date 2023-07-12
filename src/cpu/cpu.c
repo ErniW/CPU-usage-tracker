@@ -79,8 +79,10 @@ unsigned int CPU_getAverageUsage(CPU_core *prev, CPU_core *next){
     unsigned long idleDiff      = currentIdle - prevIdle;
 
      
-
+    if(totalDiff == 0) return 0;
     unsigned int cpuPercentage  = (totalDiff - idleDiff) * 100 / totalDiff;
-
     return cpuPercentage;
+
+    // double cpuPercentage  = (double)(((double)totalDiff - (double)idleDiff) * 100 / (double)totalDiff);
+    // return (unsigned int)cpuPercentage;
 }

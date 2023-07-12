@@ -1,22 +1,28 @@
 #include "reader.h"
+#include <queue.h>
 
 extern volatile __sig_atomic_t exitFlag;
 extern pthread_mutex_t access_mtx;
 extern CPU_state state;
 extern pthread_cond_t condition;
+extern Queue CPU_stateBuffer;
 
 void* readerFunction(void* args){
 
     while(!exitFlag){
 
-        pthread_mutex_lock(&access_mtx);
-        pthread_cond_signal(&condition);
+        sem_wait(&CPU_stateBuffer.empty_sem);
 
-        CPU_readUsage(&state);
-         
-        pthread_mutex_unlock(&access_mtx);
-        usleep(100000);
+        pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
+
+        
+        CPU_readUsage(&CPU_stateBuffer.buffer[CPU_stateBuffer.tail]);
+        
+        CPU_stateBuffer.tail = (CPU_stateBuffer.tail + 1) % BUFFER_SIZE;
+        pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
+
+        sem_post(&CPU_stateBuffer.full_sem);
     }
-
+    sem_post(&CPU_stateBuffer.full_sem);
     pthread_exit(NULL);
 }
