@@ -1,7 +1,7 @@
 #include <cpu.h>
 #include "tests.h"
 
-void should_return_global_cpu_id(void){
+void should_return_total_cpu_id(void){
 
     CPU_core cpu = CPU_parseUsage(GLOBAL_CPU_MOCK);
 
@@ -27,4 +27,16 @@ void should_return_correct_parsed_cpu_struct(void){
     assert(cpu.guest_nice == 0);
 
     printf("TEST PASSED: should_return_correct_parsed_cpu_struct\n");
+}
+
+void should_compute_cpu_usage(void){
+
+    CPU_core prev = CPU_parseUsage(PREV_CPU_MOCK);
+    CPU_core current = CPU_parseUsage(CURRENT_CPU_MOCK);
+
+    unsigned int usage = CPU_getAverageUsage(&prev, &current);
+
+    assert(usage == 50);
+
+    printf("TEST PASSED: should_compute_cpu_usage\n");
 }

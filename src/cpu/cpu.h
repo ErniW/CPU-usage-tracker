@@ -20,6 +20,13 @@ struct CPU_core{
 
 typedef struct CPU_core CPU_core;
 
+struct CPU_state{
+    CPU_core total;
+    CPU_core* cores;
+};
+
+typedef struct CPU_state CPU_state;
+
 void CPU_readUsage(void);
 CPU_core CPU_parseUsage(char* line);
 
