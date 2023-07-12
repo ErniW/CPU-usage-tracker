@@ -28,11 +28,14 @@ struct CPU_state{
 
 typedef struct CPU_state CPU_state;
 
-// struct CPU_globalState{
+struct CPU_usage{
+    CPU_state* prev;
+    CPU_state* current;
+    unsigned int total;
+    unsigned int* coreValue;
+};
 
-// };
-
-// typedef struct CPU_globalstate CPU_globalstate;
+typedef struct CPU_usage CPU_usage;
 
 
 void CPU_readUsage(CPU_state* state);

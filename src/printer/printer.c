@@ -2,12 +2,9 @@
 #include <queue.h>
 
 extern volatile __sig_atomic_t exitFlag;
-extern pthread_mutex_t access_mtx;
-extern CPU_state state;
-extern CPU_state prevState;
-extern pthread_cond_t condition;
-extern unsigned int usage;
+extern CPU_usage usageTracker;
 extern Queue CPU_stateBuffer;
+extern int NUM_CORES;
 
 
 void* printerFunction(void* args){
@@ -16,9 +13,16 @@ void* printerFunction(void* args){
 
         pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
 
-        printf("%u\n", usage);
-        prevState = state;
-        
+        printf("%u - \t", usageTracker.total);
+
+         for(int i=0; i<NUM_CORES; i++){
+            printf("%u \t", usageTracker.coreValue[i]);
+        }
+        printf("\n");
+
+        memcpy(usageTracker.prev->cores, usageTracker.current->cores, 8 * sizeof(CPU_core));
+         usageTracker.prev->total = usageTracker.current->total;
+
         pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
        
         sleep(1);

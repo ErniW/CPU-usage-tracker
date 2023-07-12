@@ -3,6 +3,7 @@
 #include <analyzer.h>
 #include <printer.h>
 #include <queue.h>
+#include <utils.h>
 
 #ifdef DEBUG
     #include <tests.h>
@@ -17,26 +18,23 @@ pthread_t readerThread;
 pthread_t analyzerThread;
 pthread_t printerThread;
 
-pthread_mutex_t access_mtx = PTHREAD_MUTEX_INITIALIZER;
-CPU_state state;
-CPU_state prevState;
-unsigned int usage = 0;
-pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
-
-
-volatile __sig_atomic_t exitFlag = 0;
+CPU_usage usageTracker;
 
 Queue CPU_stateBuffer;
 
-void handleSIGINT(int signal) {
-    printf("[SIGINT %d] received. Exiting...\n", signal);
-    exitFlag = 1;
- }
+int NUM_CORES;
 
 int main(){
 
-    int coresAmount = sysconf(_SC_NPROCESSORS_ONLN);
-   // state.cores = malloc(sizeof(CPU_core) * coresAmount);
+    NUM_CORES = sysconf(_SC_NPROCESSORS_ONLN);
+
+    usageTracker.prev = (CPU_state*)malloc(NUM_CORES * sizeof(CPU_state));
+    usageTracker.current= (CPU_state*)malloc(NUM_CORES * sizeof(CPU_state));
+    usageTracker.prev->cores = (CPU_core*)malloc(8 * sizeof(CPU_core));
+    usageTracker.current->cores = (CPU_core*)malloc(8 * sizeof(CPU_core));
+    usageTracker.coreValue = (unsigned int*)malloc(8 * sizeof(unsigned int));
+
+
 
     Queue_init(&CPU_stateBuffer);
 

@@ -1,16 +1,11 @@
 #include <analyzer.h>
 #include <queue.h>
+#include <stdbool.h>
 
 extern volatile __sig_atomic_t exitFlag;
-extern pthread_mutex_t access_mtx;
-extern CPU_state state;
-extern CPU_state prevState;
-extern pthread_cond_t condition;
-extern unsigned int usage;
+extern CPU_usage usageTracker;
 extern Queue CPU_stateBuffer;
-
-
-#include <stdbool.h>
+extern int NUM_CORES;
 
 void* analyzerFunction(void* args){
 
@@ -24,15 +19,21 @@ void* analyzerFunction(void* args){
         CPU_stateBuffer.head = (CPU_stateBuffer.head + 1) % BUFFER_SIZE;
 
         if(!isInit){
-            prevState = CPU_stateBuffer.buffer[CPU_stateBuffer.head];
-            isInit = true; 
-        }
-        else{
-            state = CPU_stateBuffer.buffer[CPU_stateBuffer.head];
-            usage = CPU_getAverageUsage(&prevState.total, &state.total);
-            
 
+            memcpy(usageTracker.prev->cores, CPU_stateBuffer.buffer[CPU_stateBuffer.head].cores, 8 * sizeof(CPU_core));
+            usageTracker.prev->total = CPU_stateBuffer.buffer[CPU_stateBuffer.head].total;
+            isInit = true;
         }
+
+        memcpy(usageTracker.current->cores, CPU_stateBuffer.buffer[CPU_stateBuffer.head].cores, 8 * sizeof(CPU_core));
+
+        usageTracker.total = CPU_getAverageUsage(&usageTracker.prev->total, &usageTracker.current->total);
+
+        for(int i=0; i<NUM_CORES; i++){
+            usageTracker.coreValue[i] = CPU_getAverageUsage(&usageTracker.prev->cores[i], &usageTracker.current->cores[i]);
+        }
+
+        usageTracker.current->total = CPU_stateBuffer.buffer[CPU_stateBuffer.head].total;
 
         pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
 
