@@ -13,18 +13,24 @@ void* printerFunction(void* args){
         pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
 
         if(usageTracker.prev != NULL  && usageTracker.current != NULL){
+      
+            printf("CPU USAGE TRACKER\n");
+            printf("\x1b[7m");
+            printf("Total: %3lu%%\n", usageTracker.total);
+            printf("\x1b[0m");
+
+            for(int i=0; i<NUM_CORES; i++){
+                char bar[10];
+                unsigned long barLength = usageTracker.coreValue[i] / 10;
+                memset(bar, ' ', sizeof(bar));
+                memset(bar, '=', barLength * sizeof(char));
+                printf("CPU %2d: [%10s] %3u%% \n", i + 1, bar, usageTracker.coreValue[i]);
+            }
+            
+            printf("\033[H\033[0J");
 
             free(usageTracker.prev->cores);
             free(usageTracker.prev);
-
-            printf("Total: %u ", usageTracker.total);
-
-            for(int i=0; i<NUM_CORES; i++){
-                printf("CPU %d: %u ", i, usageTracker.coreValue[i]);          
-            }
-
-            printf("\n");
-
             usageTracker.prev = usageTracker.current;
             usageTracker.current = NULL;
         }
