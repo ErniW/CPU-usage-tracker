@@ -6,22 +6,28 @@ extern CPU_usage usageTracker;
 extern Queue CPU_stateBuffer;
 extern int NUM_CORES;
 
-
 void* printerFunction(void* args){
 
     while(!exitFlag){
 
         pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
 
-        printf("%u - \t", usageTracker.total);
+        if(usageTracker.prev != NULL  && usageTracker.current != NULL){
 
-        for(int i=0; i<NUM_CORES; i++){
-            printf("%u \t", usageTracker.coreValue[i]);
-            usageTracker.prev->cores[i] = usageTracker.current->cores[i];
+            free(usageTracker.prev->cores);
+            free(usageTracker.prev);
+
+            printf("Total: %u ", usageTracker.total);
+
+            for(int i=0; i<NUM_CORES; i++){
+                printf("CPU %d: %u ", i, usageTracker.coreValue[i]);          
+            }
+
+            printf("\n");
+
+            usageTracker.prev = usageTracker.current;
+            usageTracker.current = NULL;
         }
-        printf("\n");
-
-        usageTracker.prev->total = usageTracker.current->total;
 
         pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
        

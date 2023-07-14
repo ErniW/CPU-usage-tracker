@@ -32,8 +32,7 @@ typedef struct CPU_state CPU_state;
 struct CPU_usage{
     CPU_state* prev;
     CPU_state* current;
-    bool isInit;
-    unsigned int total;
+    unsigned long total;
     unsigned int* coreValue;
 };
 
@@ -42,5 +41,6 @@ typedef struct CPU_usage CPU_usage;
 
 void CPU_readUsage(CPU_state* state);
 CPU_core CPU_parseUsage(char* line);
+void copy_CPU_state(CPU_state** n, CPU_state* s);
 
 unsigned int CPU_getAverageUsage(CPU_core* prev, CPU_core* next);

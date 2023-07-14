@@ -9,37 +9,32 @@ extern int NUM_CORES;
 
 void* analyzerFunction(void* args){
 
-    bool isInit = false;
-   
-
     while(!exitFlag){
 
         sem_wait(&CPU_stateBuffer.full_sem);
         pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
 
         CPU_state newData = Queue_pop(&CPU_stateBuffer);
-
-        if(!isInit){
-            free(usageTracker.current->cores);
-            *usageTracker.prev->cores = *newData.cores;
-            usageTracker.prev->total = newData.total;
-            
-        
-            isInit = true;
+    
+        if(usageTracker.prev == NULL){
+            copy_CPU_state(&usageTracker.prev, &newData);
         }
-        
-        
-        *usageTracker.current = newData;
+        else if(usageTracker.current == NULL){
+            copy_CPU_state(&usageTracker.current, &newData);
 
-        usageTracker.total = CPU_getAverageUsage(&usageTracker.prev->total, &usageTracker.current->total);
+            usageTracker.total = CPU_getAverageUsage(&usageTracker.prev->total, &usageTracker.current->total);
 
-        for(int i=0; i<NUM_CORES; i++){
-            usageTracker.coreValue[i] = CPU_getAverageUsage(&usageTracker.prev->cores[i], &usageTracker.current->cores[i]);
+            for(int i=0; i<NUM_CORES; i++){
+                usageTracker.coreValue[i] = CPU_getAverageUsage(&usageTracker.prev->cores[i], &usageTracker.current->cores[i]);
+            }
+
         }
 
         pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
-        sem_post(&CPU_stateBuffer.empty_sem);
+        sem_post(&CPU_stateBuffer.empty_sem);    
     }
+    
+ 
     
     sem_post(&CPU_stateBuffer.full_sem);
     pthread_exit(NULL);
