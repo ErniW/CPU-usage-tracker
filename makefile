@@ -1,6 +1,6 @@
 PROJECT_NAME = cpu_usage_tracker
 
-CC := gcc
+CC := clang
 
 SRCS = src/main.c
 SRCS += src/cpu/cpu.c
@@ -32,5 +32,5 @@ compile:
 	./build/prod/$(PROJECT_NAME).elf
 
 test:
-	$(CC) $(SRCS) $(TESTS) $(CFLAGS) $(INCLUDES) -o build/debug/$(PROJECT_NAME).elf -DDEBUG -pthread -g -O0
+	$(CC) $(SRCS) $(TESTS) $(CFLAGS) $(INCLUDES) -o build/debug/$(PROJECT_NAME).elf -DDEBUG -pthread
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s build/debug/$(PROJECT_NAME).elf

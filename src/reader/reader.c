@@ -6,6 +6,7 @@ extern CPU_usage usageTracker;
 extern Queue CPU_stateBuffer;
 
 void* readerFunction(void* args){
+    (void)args;
 
     while(!exitFlag){
         sem_wait(&CPU_stateBuffer.empty_sem);

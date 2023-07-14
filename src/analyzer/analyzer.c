@@ -1,6 +1,5 @@
-#include <analyzer.h>
+#include "analyzer.h"
 #include <queue.h>
-#include <stdbool.h>
 
 extern volatile __sig_atomic_t exitFlag;
 extern CPU_usage usageTracker;
@@ -8,14 +7,16 @@ extern Queue CPU_stateBuffer;
 extern int NUM_CORES;
 
 void* analyzerFunction(void* args){
+    CPU_state newData;
+    (void)args;
 
     while(!exitFlag){
 
         sem_wait(&CPU_stateBuffer.full_sem);
         pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
 
-        CPU_state newData = Queue_pop(&CPU_stateBuffer);
-    
+        newData = Queue_pop(&CPU_stateBuffer);
+
         if(usageTracker.prev == NULL){
             copy_CPU_state(&usageTracker.prev, &newData);
         }
@@ -33,8 +34,6 @@ void* analyzerFunction(void* args){
         pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
         sem_post(&CPU_stateBuffer.empty_sem);    
     }
-    
- 
     
     sem_post(&CPU_stateBuffer.full_sem);
     pthread_exit(NULL);

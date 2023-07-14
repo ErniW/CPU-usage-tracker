@@ -68,6 +68,8 @@ void copy_CPU_state(CPU_state** n, CPU_state* s) {
 
 unsigned int CPU_getAverageUsage(CPU_core *prev, CPU_core *next){
 
+    unsigned int cpuPercentage = 0;
+
     unsigned long prevIdle      = prev->idle + prev->iowait;
     unsigned long prevActive    = prev->user
                                 + prev->nice
@@ -92,9 +94,6 @@ unsigned int CPU_getAverageUsage(CPU_core *prev, CPU_core *next){
 
      
     if(totalDiff == 0) return 0;
-    unsigned int cpuPercentage  = (totalDiff - idleDiff) * 100 / totalDiff;
+    cpuPercentage  = (unsigned int)(totalDiff - idleDiff) * 100 / totalDiff;
     return cpuPercentage;
-
-    // double cpuPercentage  = (double)(((double)totalDiff - (double)idleDiff) * 100 / (double)totalDiff);
-    // return (unsigned int)cpuPercentage;
 }

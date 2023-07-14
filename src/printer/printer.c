@@ -7,13 +7,13 @@ extern Queue CPU_stateBuffer;
 extern int NUM_CORES;
 
 void* printerFunction(void* args){
-
+    (void)args;
     while(!exitFlag){
 
         pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
 
         if(usageTracker.prev != NULL  && usageTracker.current != NULL){
-      
+            
             printf("CPU USAGE TRACKER\n");
             printf("\x1b[7m");
             printf("Total: %3lu%%\n", usageTracker.total);
@@ -24,10 +24,11 @@ void* printerFunction(void* args){
                 unsigned long barLength = usageTracker.coreValue[i] / 10;
                 memset(bar, ' ', sizeof(bar));
                 memset(bar, '=', barLength * sizeof(char));
+
                 printf("CPU %2d: [%10s] %3u%% \n", i + 1, bar, usageTracker.coreValue[i]);
             }
             
-            printf("\033[H\033[0J");
+            printf("\033[H\033[J");
 
             free(usageTracker.prev->cores);
             free(usageTracker.prev);
