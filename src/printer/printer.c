@@ -8,27 +8,21 @@ extern int NUM_CORES;
 
 void* printerFunction(void* args){
     (void)args;
+   
     while(!exitFlag){
 
         pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
 
         if(usageTracker.prev != NULL  && usageTracker.current != NULL){
-            
+
             printf("CPU USAGE TRACKER\n");
-            printf("\x1b[7m");
-            printf("Total: %3lu%%\n", usageTracker.total);
-            printf("\x1b[0m");
+            printf(COLOR_INVERSED "Total: %3lu%%\n" COLOR_CLEAR, usageTracker.total);        
 
             for(int i=0; i<NUM_CORES; i++){
-                char bar[10];
-                unsigned long barLength = usageTracker.coreValue[i] / 10;
-                memset(bar, ' ', sizeof(bar));
-                memset(bar, '=', barLength * sizeof(char));
-
-                printf("CPU %2d: [%10s] %3u%% \n", i + 1, bar, usageTracker.coreValue[i]);
+                printCoreStats(i, usageTracker.coreValue[i]);
             }
             
-            printf("\033[H\033[J");
+            printf(CLEAR_SCREEN);
 
             free(usageTracker.prev->cores);
             free(usageTracker.prev);
@@ -42,4 +36,23 @@ void* printerFunction(void* args){
     }
 
     pthread_exit(NULL);
+}
+
+void printCoreStats(int i, unsigned int usage){
+    unsigned long barLength = usage / 10;
+    char color[6] = "";
+    char bar[11] = "";
+
+    if(usage >= 5 && usage != 100) barLength += 1;
+
+    memset(bar, ' ', sizeof(bar)-1);
+    memset(bar, '=', barLength);
+
+    if(barLength <= 3)      strcpy(color, COLOR_GREEN);
+    else if(barLength <=7)  strcpy(color, COLOR_YELLOW);
+    else                    strcpy(color, COLOR_RED);
+
+    printf("CPU %2d: ", i+1);
+    printf("[%s%10s" COLOR_CLEAR "]", color, bar);
+    printf( "%s%3u%%" COLOR_CLEAR "\n", color, usage);
 }
