@@ -3,6 +3,7 @@
 #include <analyzer.h>
 #include <printer.h>
 #include <queue.h>
+#include <utils.h>
 
 #ifdef DEBUG
     #include <tests.h>
@@ -13,30 +14,30 @@
 #include <signal.h>
 #include <unistd.h>
 
+extern CPU_usage usageTracker;
+extern Queue CPU_stateBuffer;
+extern pthread_t readerThread;
+extern pthread_t analyzerThread;
+extern pthread_t printerThread;
+extern int NUM_CORES;
+
+
 pthread_t readerThread;
 pthread_t analyzerThread;
 pthread_t printerThread;
 
-pthread_mutex_t access_mtx = PTHREAD_MUTEX_INITIALIZER;
-CPU_state state;
-CPU_state prevState;
-unsigned int usage = 0;
-pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
-
-
-volatile __sig_atomic_t exitFlag = 0;
-
+CPU_usage usageTracker;
 Queue CPU_stateBuffer;
 
-void handleSIGINT(int signal) {
-    printf("[SIGINT %d] received. Exiting...\n", signal);
-    exitFlag = 1;
- }
+int NUM_CORES;
 
 int main(){
 
-    int coresAmount = sysconf(_SC_NPROCESSORS_ONLN);
-   // state.cores = malloc(sizeof(CPU_core) * coresAmount);
+    NUM_CORES = (int)sysconf(_SC_NPROCESSORS_ONLN);
+
+    usageTracker.prev = NULL;
+    usageTracker.current = NULL;
+    usageTracker.coreValue = (unsigned int*)malloc((unsigned long)NUM_CORES * sizeof(unsigned int));
 
     Queue_init(&CPU_stateBuffer);
 
@@ -64,5 +65,10 @@ int main(){
         free(CPU_stateBuffer.buffer[i].cores);
     }
 
+    free(usageTracker.current->cores);
+    free(usageTracker.prev->cores);
+    free(usageTracker.current);
+    free(usageTracker.prev);
+    free(usageTracker.coreValue);
     return 0;
 }

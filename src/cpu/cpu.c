@@ -1,14 +1,17 @@
 #include "cpu.h"
 
+extern int NUM_CORES;
+
 void CPU_readUsage(CPU_state* state){
     FILE* data = fopen("/proc/stat", "r");
+    char line[256];
+
     if(data == NULL){
         perror("Error opening file");
         fclose(data);
         return;
     }
 
-    char line[256];
     while(fgets(line, sizeof(line), data) != NULL && strncmp(line, "cpu", 3) == 0){
         // printf("%s", line);
 
@@ -21,8 +24,6 @@ void CPU_readUsage(CPU_state* state){
             state->cores[core.id] = core;
         }
 
-        
-        
     }
 
     fclose(data);
@@ -54,7 +55,20 @@ CPU_core CPU_parseUsage(char* line){
     return core;
 }
 
+void copy_CPU_state(CPU_state** n, CPU_state* s) {
+    *n = (CPU_state*)malloc(sizeof(CPU_state));
+    (*n)->cores = (CPU_core*)malloc((unsigned long)NUM_CORES * sizeof(CPU_core));
+
+    for(int i=0; i<NUM_CORES; i++){
+        (*n)->cores[i] = s->cores[i]; 
+    }
+
+    (*n)->total = s->total;
+}
+
 unsigned int CPU_getAverageUsage(CPU_core *prev, CPU_core *next){
+
+    unsigned int cpuPercentage = 0;
 
     unsigned long prevIdle      = prev->idle + prev->iowait;
     unsigned long prevActive    = prev->user
@@ -80,9 +94,6 @@ unsigned int CPU_getAverageUsage(CPU_core *prev, CPU_core *next){
 
      
     if(totalDiff == 0) return 0;
-    unsigned int cpuPercentage  = (totalDiff - idleDiff) * 100 / totalDiff;
+    cpuPercentage  = (unsigned int)(totalDiff - idleDiff) * 100 / totalDiff;
     return cpuPercentage;
-
-    // double cpuPercentage  = (double)(((double)totalDiff - (double)idleDiff) * 100 / (double)totalDiff);
-    // return (unsigned int)cpuPercentage;
 }

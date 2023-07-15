@@ -11,3 +11,13 @@ void Queue_init(Queue* queue){
         queue->buffer[i].cores = malloc(sizeof(CPU_core) * 8);
     }
 }
+
+void Queue_push(Queue* queue){
+    CPU_readUsage(&queue->buffer[queue->tail]);
+    queue->tail = (queue->tail + 1) % BUFFER_SIZE;
+}
+
+CPU_state Queue_pop(Queue* queue){
+    queue->head = (queue->head + 1) % BUFFER_SIZE;
+    return queue->buffer[queue->head];
+}

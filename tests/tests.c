@@ -1,6 +1,8 @@
 #include <cpu.h>
 #include "tests.h"
 
+extern int NUM_CORES;
+
 void should_return_total_cpu_id(void){
 
     CPU_core cpu = CPU_parseUsage(GLOBAL_CPU_MOCK);
@@ -44,14 +46,13 @@ void should_compute_cpu_usage(void){
 void should_return_correct_parsed_cpu_state_struct(void){
 
     CPU_state state;
-    int numCores = 8;
 
-    state.cores = malloc(sizeof(CPU_core) * numCores);
+    state.cores = malloc(sizeof(CPU_core) * (unsigned long)NUM_CORES);
     
     CPU_readUsage(&state);
 
     assert(state.total.id == -1);
-    for(int i=0; i<numCores; i++){
+    for(int i=0; i<NUM_CORES; i++){
         assert(state.cores[i].id == i);
     }
     
