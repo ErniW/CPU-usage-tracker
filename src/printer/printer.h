@@ -12,4 +12,5 @@
 #define CLEAR_SCREEN    "\033[H\033[J"
 
 void* printerFunction(void* args);
+void printerCleanup(void* args);
 void printCoreStats(int i, unsigned int usage);

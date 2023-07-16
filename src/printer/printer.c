@@ -1,15 +1,25 @@
 #include "printer.h"
 #include <queue.h>
+#include <watchdog.h>
 
-extern volatile __sig_atomic_t exitFlag;
 extern CPU_usage usageTracker;
 extern Queue CPU_stateBuffer;
 extern int NUM_CORES;
 
+void printerCleanup(void* args){
+    printf("Printer cleanup called\n");
+
+    pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
+}
+
 void* printerFunction(void* args){
     (void)args;
+
+    pthread_cleanup_push(printerCleanup, NULL)
    
-    while(!exitFlag){
+    while(1){
+
+        watchdogUpdate(PRINTER_THREAD);
 
         pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
 
@@ -23,17 +33,18 @@ void* printerFunction(void* args){
             }
             
             printf(CLEAR_SCREEN);
-
+             
             free(usageTracker.prev->cores);
             free(usageTracker.prev);
             usageTracker.prev = usageTracker.current;
             usageTracker.current = NULL;
         }
-
-        pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
-       
+        
+        pthread_mutex_unlock(&CPU_stateBuffer.access_mtx); 
         sleep(1);
     }
+   
+    pthread_cleanup_pop(1);
 
     pthread_exit(NULL);
 }
