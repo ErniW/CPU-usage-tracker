@@ -8,7 +8,8 @@ SRCS += src/reader/reader.c
 SRCS += src/analyzer/analyzer.c
 SRCS += src/printer/printer.c
 SRCS += src/queue/queue.c
-SRCS += src/utils/utils.c
+SRCS += src/utils/watchdog.c
+SRCS += src/utils/sigint.c
 
 
 INCLUDES = -Isrc/cpu/
