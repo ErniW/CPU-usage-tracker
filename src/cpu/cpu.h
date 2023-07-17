@@ -33,7 +33,7 @@ struct CPU_usage{
     CPU_state* prev;
     CPU_state* current;
     unsigned long total;
-    unsigned int* coreValue;
+    unsigned int* value;
 };
 
 typedef struct CPU_usage CPU_usage;

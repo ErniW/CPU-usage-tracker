@@ -3,8 +3,8 @@
 #include <watchdog.h>
 #include <fcntl.h>
 
-extern CPU_usage usageTracker;
-extern Queue CPU_stateBuffer;
+extern CPU_usage usage;
+extern Queue buffer;
 
 extern FILE* data;
 FILE* data = NULL;
@@ -19,19 +19,19 @@ void readerCleanup(void* args) {
         fclose(file);
     }
 
-    if(usageTracker.current != NULL){
-        free(usageTracker.current->cores);
-        free(usageTracker.current);
-        usageTracker.current = NULL;
+    if(usage.current != NULL){
+        free(usage.current->cores);
+        free(usage.current);
+        usage.current = NULL;
     } 
 
-    if(usageTracker.prev != NULL) {
-        free(usageTracker.prev->cores);
-        free(usageTracker.prev);
-        usageTracker.prev = NULL;
+    if(usage.prev != NULL) {
+        free(usage.prev->cores);
+        free(usage.prev);
+        usage.prev = NULL;
     }
 
-    pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
+    pthread_mutex_unlock(&buffer.access_mtx);
     
     #ifdef DEBUG
         printf("Reader cleanup done\n");
@@ -48,18 +48,17 @@ void* readerFunction(void* args){
         
         watchdogUpdate(READER_THREAD);
   
-        sem_wait(&CPU_stateBuffer.empty_sem);
-        pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
+        sem_wait(&buffer.empty_sem);
+        pthread_mutex_lock(&buffer.access_mtx);
 
         data = fopen("/proc/stat", "r");
 
-        Queue_push(&CPU_stateBuffer, data);
+        Queue_push(&buffer, data);
         
         fclose(data);
         data = NULL;
-        
-        pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
-        sem_post(&CPU_stateBuffer.full_sem);
+        pthread_mutex_unlock(&buffer.access_mtx);
+        sem_post(&buffer.full_sem);
 
     }
 

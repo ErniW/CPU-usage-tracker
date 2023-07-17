@@ -14,8 +14,8 @@
 #include <pthread.h>
 #include <unistd.h>
 
-extern CPU_usage usageTracker;
-extern Queue CPU_stateBuffer;
+extern CPU_usage usage;
+extern Queue buffer;
 extern pthread_t readerThread;
 extern pthread_t analyzerThread;
 extern pthread_t printerThread;
@@ -30,8 +30,8 @@ pthread_t analyzerThread;
 pthread_t printerThread;
 pthread_t watchdogThread;
 
-CPU_usage usageTracker;
-Queue CPU_stateBuffer;
+CPU_usage usage;
+Queue buffer;
 
 int NUM_CORES;
 
@@ -39,11 +39,11 @@ int main(){
 
     NUM_CORES = (int)sysconf(_SC_NPROCESSORS_ONLN);
 
-    usageTracker.prev = NULL;
-    usageTracker.current = NULL;
-    usageTracker.coreValue = (unsigned int*)malloc((unsigned long)NUM_CORES * sizeof(unsigned int));
+    usage.prev = NULL;
+    usage.current = NULL;
+    usage.value = (unsigned int*)malloc((unsigned long)NUM_CORES * sizeof(unsigned int));
 
-    Queue_init(&CPU_stateBuffer);
+    Queue_init(&buffer);
 
     pthread_mutex_init(&watchdog_mtx, NULL);
 
@@ -69,7 +69,7 @@ int main(){
     pthread_join(watchdogThread, NULL);
     
     for (int i = 0; i < BUFFER_SIZE; i++) {
-        free(CPU_stateBuffer.buffer[i].cores);
+        free(buffer.data[i].cores);
     }
 
     if (data != NULL) {

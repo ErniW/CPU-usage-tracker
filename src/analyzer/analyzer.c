@@ -2,27 +2,27 @@
 #include <queue.h>
 #include <watchdog.h>
 
-extern CPU_usage usageTracker;
-extern Queue CPU_stateBuffer;
+extern CPU_usage usage;
+extern Queue buffer;
 extern int NUM_CORES;
 
 void analyzerCleanup(void* args) {
     (void)args;
 
-    if(usageTracker.current != NULL){
-        free(usageTracker.current->cores);
-        free(usageTracker.current);
-        usageTracker.current = NULL;
+    if(usage.current != NULL){
+        free(usage.current->cores);
+        free(usage.current);
+        usage.current = NULL;
     } 
 
-    if(usageTracker.prev != NULL) {
-        free(usageTracker.prev->cores);
-        free(usageTracker.prev);
-        usageTracker.prev = NULL;
+    if(usage.prev != NULL) {
+        free(usage.prev->cores);
+        free(usage.prev);
+        usage.prev = NULL;
     }
    
-    free(usageTracker.coreValue);
-    pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
+    free(usage.value);
+    pthread_mutex_unlock(&buffer.access_mtx);
 
     #ifdef DEBUG
         printf("Analyzer cleanup done\n");
@@ -39,27 +39,27 @@ void* analyzerFunction(void* args){
         
         watchdogUpdate(ANALYZER_THREAD);
 
-        sem_wait(&CPU_stateBuffer.full_sem);
-        pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
+        sem_wait(&buffer.full_sem);
+        pthread_mutex_lock(&buffer.access_mtx);
        
-        newData = Queue_pop(&CPU_stateBuffer);
+        newData = Queue_pop(&buffer);
 
-        if(usageTracker.prev == NULL){
-            copy_CPU_state(&usageTracker.prev, &newData);
+        if(usage.prev == NULL){
+            copy_CPU_state(&usage.prev, &newData);
         }
-        else if(usageTracker.current == NULL){
+        else if(usage.current == NULL){
             
-            copy_CPU_state(&usageTracker.current, &newData);
-            usageTracker.total = CPU_getAverageUsage(&usageTracker.prev->total, &usageTracker.current->total);
+            copy_CPU_state(&usage.current, &newData);
+            usage.total = CPU_getAverageUsage(&usage.prev->total, &usage.current->total);
 
             for(int i=0; i<NUM_CORES; i++){
-                usageTracker.coreValue[i] = CPU_getAverageUsage(&usageTracker.prev->cores[i], &usageTracker.current->cores[i]);
+                usage.value[i] = CPU_getAverageUsage(&usage.prev->cores[i], &usage.current->cores[i]);
             }
             
         }
         
-        pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
-        sem_post(&CPU_stateBuffer.empty_sem);    
+        pthread_mutex_unlock(&buffer.access_mtx);
+        sem_post(&buffer.empty_sem);    
     }
 
     pthread_cleanup_pop(1);

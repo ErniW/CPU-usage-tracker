@@ -12,7 +12,7 @@ struct Queue{
     sem_t empty_sem;
     sem_t full_sem;
     pthread_mutex_t access_mtx;
-    CPU_state buffer[BUFFER_SIZE];
+    CPU_state data[BUFFER_SIZE];
 };
 
 typedef struct Queue Queue;
