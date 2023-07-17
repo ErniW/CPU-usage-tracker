@@ -7,9 +7,13 @@ extern Queue CPU_stateBuffer;
 extern int NUM_CORES;
 
 void printerCleanup(void* args){
-    printf("Printer cleanup called\n");
+    (void)args;
 
     pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
+
+    #ifdef DEBUG
+        printf("Printer cleanup done\n");
+    #endif
 }
 
 void* printerFunction(void* args){

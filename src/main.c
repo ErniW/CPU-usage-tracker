@@ -73,11 +73,5 @@ int main(){
     for (int i = 0; i < BUFFER_SIZE; i++) {
         free(CPU_stateBuffer.buffer[i].cores);
     }
-
-    // if(usageTracker.prev!= NULL) free(usageTracker.prev->cores);
-    // if(usageTracker.current!= NULL) free(usageTracker.current->cores);
-    // free(usageTracker.current);
-    // free(usageTracker.prev);
-    free(usageTracker.coreValue);
     return 0;
 }

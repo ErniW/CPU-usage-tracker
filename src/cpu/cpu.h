@@ -39,7 +39,7 @@ struct CPU_usage{
 typedef struct CPU_usage CPU_usage;
 
 
-void CPU_readUsage(CPU_state* state);
+void CPU_readUsage(CPU_state* state, FILE* data);
 CPU_core CPU_parseUsage(char* line);
 void copy_CPU_state(CPU_state** n, CPU_state* s);
 

@@ -18,5 +18,5 @@ struct Queue{
 typedef struct Queue Queue;
 
 void Queue_init(Queue* queue);
-void Queue_push(Queue* queue);
+void Queue_push(Queue* queue, FILE* data);
 CPU_state Queue_pop(Queue* queue);

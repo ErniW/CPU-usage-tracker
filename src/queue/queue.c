@@ -12,9 +12,9 @@ void Queue_init(Queue* queue){
     }
 }
 
-void Queue_push(Queue* queue){
-    CPU_readUsage(&queue->buffer[queue->tail]);
-    queue->tail = (queue->tail + 1) % BUFFER_SIZE;
+void Queue_push(Queue* queue, FILE* data){
+    CPU_readUsage(&queue->buffer[queue->tail], data);
+    queue->tail = (queue->tail+ 1) % BUFFER_SIZE;
 }
 
 CPU_state Queue_pop(Queue* queue){

@@ -7,7 +7,7 @@ extern Queue CPU_stateBuffer;
 extern int NUM_CORES;
 
 void analyzerCleanup(void* args) {
-    printf("Analyzer cleanup called\n");
+    (void)args;
 
     if(usageTracker.current != NULL){
         free(usageTracker.current->cores);
@@ -21,7 +21,12 @@ void analyzerCleanup(void* args) {
         usageTracker.prev = NULL;
     }
    
-      pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
+    free(usageTracker.coreValue);
+    pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
+
+    #ifdef DEBUG
+        printf("Analyzer cleanup done\n");
+    #endif
 }
 
 void* analyzerFunction(void* args){
@@ -50,9 +55,9 @@ void* analyzerFunction(void* args){
             for(int i=0; i<NUM_CORES; i++){
                 usageTracker.coreValue[i] = CPU_getAverageUsage(&usageTracker.prev->cores[i], &usageTracker.current->cores[i]);
             }
-         
+            
         }
-
+        
         pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
         sem_post(&CPU_stateBuffer.empty_sem);    
     }

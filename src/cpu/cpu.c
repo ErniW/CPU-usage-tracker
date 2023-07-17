@@ -2,18 +2,10 @@
 
 extern int NUM_CORES;
 
-void CPU_readUsage(CPU_state* state){
-    FILE* data = fopen("/proc/stat", "r");
+void CPU_readUsage(CPU_state* state, FILE* data){
     char line[256];
 
-    if(data == NULL){
-        perror("Error opening file");
-        fclose(data);
-        return;
-    }
-
     while(fgets(line, sizeof(line), data) != NULL && strncmp(line, "cpu", 3) == 0){
-        // printf("%s", line);
 
         CPU_core core = CPU_parseUsage(line);
 
@@ -25,8 +17,6 @@ void CPU_readUsage(CPU_state* state){
         }
 
     }
-
-    fclose(data);
 }
 
 CPU_core CPU_parseUsage(char* line){
