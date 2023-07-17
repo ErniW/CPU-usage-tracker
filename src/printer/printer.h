@@ -13,4 +13,5 @@
 
 void* printerFunction(void* args);
 void printerCleanup(void* args);
-void printCoreStats(int i, unsigned int usage);
+char* setColor(unsigned int usage);
+void printUsageBar(unsigned int usage, char* color);

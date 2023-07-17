@@ -33,7 +33,14 @@ void* printerFunction(void* args){
             printf(COLOR_INVERSED "Total: %3lu%%\n" COLOR_CLEAR, usageTracker.total);        
 
             for(int i=0; i<NUM_CORES; i++){
-                printCoreStats(i, usageTracker.coreValue[i]);
+
+                unsigned int usage = usageTracker.coreValue[i];
+
+                char* color = setColor(usage);
+
+                printf("CPU %2d: ", i+1);
+                printUsageBar(usage, color);
+                printf( "%s%3u%%" COLOR_CLEAR "\n", color, usage);
             }
             
             printf(CLEAR_SCREEN);
@@ -53,9 +60,17 @@ void* printerFunction(void* args){
     pthread_exit(NULL);
 }
 
-void printCoreStats(int i, unsigned int usage){
+char* setColor(unsigned int usage){
+    if(usage < 40)
+        return COLOR_GREEN;
+    else if(usage < 80) 
+        return COLOR_YELLOW;
+    else
+        return COLOR_RED;
+}
+
+void printUsageBar(unsigned int usage, char* color){
     unsigned long barLength = usage / 10;
-    char color[6] = "";
     char bar[11] = "";
 
     if(usage >= 5 && usage != 100) barLength += 1;
@@ -63,11 +78,5 @@ void printCoreStats(int i, unsigned int usage){
     memset(bar, ' ', sizeof(bar)-1);
     memset(bar, '=', barLength);
 
-    if(barLength <= 3)      strcpy(color, COLOR_GREEN);
-    else if(barLength <=7)  strcpy(color, COLOR_YELLOW);
-    else                    strcpy(color, COLOR_RED);
-
-    printf("CPU %2d: ", i+1);
     printf("[%s%10s" COLOR_CLEAR "]", color, bar);
-    printf( "%s%3u%%" COLOR_CLEAR "\n", color, usage);
 }
