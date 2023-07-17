@@ -39,10 +39,7 @@ int main(){
 
     NUM_CORES = (int)sysconf(_SC_NPROCESSORS_ONLN);
 
-    usage.prev = NULL;
-    usage.current = NULL;
-    usage.value = (unsigned int*)malloc((unsigned long)NUM_CORES * sizeof(unsigned int));
-
+    CPU_usage_init(&usage);
     Queue_init(&buffer);
 
     pthread_mutex_init(&watchdog_mtx, NULL);

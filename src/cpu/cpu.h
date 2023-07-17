@@ -39,6 +39,13 @@ struct CPU_usage{
 typedef struct CPU_usage CPU_usage;
 
 /**
+ * Initialize CPU_usage struct.
+ *
+ * @param usage CPU_usage struct to initialize.
+ */
+void CPU_usage_init(CPU_usage* usage);
+
+/**
  * Read current usage from raw proc/stat data.
  *
  * @param state CPU_state struct to store parsed data, usually a position in buffer.

@@ -30,7 +30,7 @@ endif
 
 compile:
 	$(CC) $(SRCS) $(CFLAGS) $(INCLUDES) -o build/prod/$(PROJECT_NAME).elf -pthread
-	./build/prod/$(PROJECT_NAME).elf
+# ./build/prod/$(PROJECT_NAME).elf
 
 test:
 	$(CC) $(SRCS) $(TESTS) $(CFLAGS) $(INCLUDES) -o build/debug/$(PROJECT_NAME).elf -DDEBUG -pthread

@@ -2,6 +2,12 @@
 
 extern int NUM_CORES;
 
+void CPU_usage_init(CPU_usage* usage){
+    usage->prev = NULL;
+    usage->current = NULL;
+    usage->value = (unsigned int*)malloc((unsigned long)NUM_CORES * sizeof(unsigned int));
+}
+
 void CPU_readUsage(CPU_state* state, FILE* data){
     char line[256];
 
