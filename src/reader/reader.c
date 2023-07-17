@@ -32,6 +32,7 @@ void readerCleanup(void* args) {
     }
 
     pthread_mutex_unlock(&buffer.access_mtx);
+    sem_destroy(&buffer.empty_sem);
     
     #ifdef DEBUG
         printf("Reader cleanup done\n");

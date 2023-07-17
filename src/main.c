@@ -55,10 +55,30 @@ int main(){
 
     signal(SIGINT, SIGINTHandler);
 
-    pthread_create(&readerThread, NULL, readerFunction, NULL);
-    pthread_create(&analyzerThread, NULL, analyzerFunction, NULL);
-    pthread_create(&printerThread, NULL, printerFunction, NULL);
-    pthread_create(&watchdogThread, NULL, watchdog, NULL);
+    if(pthread_create(&readerThread, NULL, readerFunction, NULL)){
+        #ifdef DEBUG
+            printf("Error creating reader thread.\n");
+        #endif
+        return 1;
+    }
+    if(pthread_create(&analyzerThread, NULL, analyzerFunction, NULL)){
+        #ifdef DEBUG
+            printf("Error creating analyzer thread.\n");
+        #endif
+        return 1;
+    }
+    if(pthread_create(&printerThread, NULL, printerFunction, NULL)){
+        #ifdef DEBUG
+            printf("Error creating printer thread.\n");
+        #endif
+        return 1;
+    }
+    if(pthread_create(&watchdogThread, NULL, watchdog, NULL)){
+        #ifdef DEBUG
+            printf("Error creating watchdog thread.\n");
+        #endif
+        return 1;
+    }
 
     pthread_join(readerThread, NULL);
     pthread_join(analyzerThread, NULL);
@@ -68,6 +88,9 @@ int main(){
     for (int i = 0; i < BUFFER_SIZE; i++) {
         free(buffer.data[i].cores);
     }
+
+    pthread_mutex_destroy(&watchdog_mtx);
+    pthread_mutex_destroy(&buffer.access_mtx);
 
     if (data != NULL) {
         #ifdef DEBUG

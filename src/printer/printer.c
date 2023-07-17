@@ -9,7 +9,7 @@ extern int NUM_CORES;
 void printerCleanup(void* args){
     (void)args;
 
-    pthread_mutex_unlock(&buffer.access_mtx);
+    // pthread_mutex_unlock(&buffer.access_mtx);
 
     #ifdef DEBUG
         printf("Printer cleanup done\n");

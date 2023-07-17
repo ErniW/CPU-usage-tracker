@@ -23,6 +23,7 @@ void analyzerCleanup(void* args) {
    
     free(usage.value);
     pthread_mutex_unlock(&buffer.access_mtx);
+    sem_destroy(&buffer.full_sem);
 
     #ifdef DEBUG
         printf("Analyzer cleanup done\n");
@@ -57,7 +58,7 @@ void* analyzerFunction(void* args){
             }
             
         }
-        
+
         pthread_mutex_unlock(&buffer.access_mtx);
         sem_post(&buffer.empty_sem);    
     }
