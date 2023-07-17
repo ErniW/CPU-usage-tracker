@@ -6,9 +6,9 @@ extern pthread_t printerThread;
 extern pthread_t watchdogThread;
 
 void SIGINTHandler(int signal) {
-    printf("[SIGINT %d] received. Exiting...\n", signal);
-    // exitFlag = 1;
-    // pthread_mutex_unlock(&watchdog_mtx);
+    #ifdef DEBUG
+        printf("[SIGINT %d] received. Exiting...\n", signal);
+    #endif
 
     pthread_cancel(watchdogThread);
     pthread_cancel(printerThread);

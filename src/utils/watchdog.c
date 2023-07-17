@@ -1,8 +1,5 @@
 #include "watchdog.h"
 
-// extern volatile __sig_atomic_t exitFlag;
-// volatile __sig_atomic_t exitFlag = 0;
-
 extern pthread_t readerThread;
 extern pthread_t analyzerThread;
 extern pthread_t printerThread;
@@ -11,6 +8,7 @@ extern pthread_t watchdogThread;
 extern pthread_mutex_t watchdog_mtx;
 pthread_mutex_t watchdog_mtx;
 
+extern int watchdogFlags[3];
 int watchdogFlags[3] = {0};
 
 void watchdogUpdate(int id){
@@ -20,6 +18,7 @@ void watchdogUpdate(int id){
 }
 
 void* watchdog(void* args){
+    (void)args;
 
     while(1){
         
@@ -27,8 +26,9 @@ void* watchdog(void* args){
         pthread_mutex_lock(&watchdog_mtx);
         for(int i=0; i<3; i++){
             if(!watchdogFlags[i]){
-                // exitFlag = 1;
-                printf("WATCHDOG thread [%d] not responding. Terminating...\n", i);
+                #ifdef DEBUG
+                    printf("WATCHDOG thread [%d] not responding. Terminating...\n", i);
+                #endif
                 pthread_mutex_unlock(&watchdog_mtx);
                 pthread_cancel(readerThread);
                 pthread_cancel(analyzerThread);
