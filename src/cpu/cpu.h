@@ -33,14 +33,46 @@ struct CPU_usage{
     CPU_state* prev;
     CPU_state* current;
     unsigned long total;
-    unsigned int* coreValue;
+    unsigned int* value;
 };
 
 typedef struct CPU_usage CPU_usage;
 
+/**
+ * Initialize CPU_usage struct.
+ *
+ * @param usage CPU_usage struct to initialize.
+ */
+void CPU_usage_init(CPU_usage* usage);
 
-void CPU_readUsage(CPU_state* state);
+/**
+ * Read current usage from raw proc/stat data.
+ *
+ * @param state CPU_state struct to store parsed data, usually a position in buffer.
+ * @param data Recently read proc/stat data.
+ */
+void CPU_readUsage(CPU_state* state, FILE* data);
+
+/**
+ * Parse a single line from proc/stat. Used inside CPU_readUsage function.
+ *
+ * @param line CPU_state struct to store parsed data, usually a position in buffer.
+ * @return parsed CPU_core usage stats.
+ */
 CPU_core CPU_parseUsage(char* line);
-void copy_CPU_state(CPU_state** n, CPU_state* s);
 
-unsigned int CPU_getAverageUsage(CPU_core* prev, CPU_core* next);
+/**
+ * Creates a new copy of state. A utility function to store current value
+ * Remember to free the value.
+ * @param copy new CPU_state to allocate
+ * @param src source.
+ */
+void copy_CPU_state(CPU_state** copy, CPU_state* src);
+
+/**
+ * Get average core usage by comparing current value with last measure.
+ * @param prev Previous core state
+ * @param current Current core state.
+ * @return % of usage
+ */
+unsigned int CPU_getAverageUsage(CPU_core* prev, CPU_core* current);

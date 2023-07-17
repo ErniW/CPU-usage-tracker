@@ -3,7 +3,8 @@
 #include <analyzer.h>
 #include <printer.h>
 #include <queue.h>
-#include <utils.h>
+#include <sigint.h>
+#include <watchdog.h>
 
 #ifdef DEBUG
     #include <tests.h>
@@ -11,23 +12,26 @@
 
 #include <stdio.h>
 #include <pthread.h>
-#include <signal.h>
 #include <unistd.h>
 
-extern CPU_usage usageTracker;
-extern Queue CPU_stateBuffer;
+extern CPU_usage usage;
+extern Queue buffer;
 extern pthread_t readerThread;
 extern pthread_t analyzerThread;
 extern pthread_t printerThread;
+extern pthread_t watchdogThread;
 extern int NUM_CORES;
+extern FILE* data;
 
+extern pthread_mutex_t watchdog_mtx;
 
 pthread_t readerThread;
 pthread_t analyzerThread;
 pthread_t printerThread;
+pthread_t watchdogThread;
 
-CPU_usage usageTracker;
-Queue CPU_stateBuffer;
+CPU_usage usage;
+Queue buffer;
 
 int NUM_CORES;
 
@@ -35,11 +39,10 @@ int main(){
 
     NUM_CORES = (int)sysconf(_SC_NPROCESSORS_ONLN);
 
-    usageTracker.prev = NULL;
-    usageTracker.current = NULL;
-    usageTracker.coreValue = (unsigned int*)malloc((unsigned long)NUM_CORES * sizeof(unsigned int));
+    CPU_usage_init(&usage);
+    Queue_init(&buffer);
 
-    Queue_init(&CPU_stateBuffer);
+    pthread_mutex_init(&watchdog_mtx, NULL);
 
     #ifdef DEBUG
         printf("\nStarting tests:\n\n");
@@ -50,25 +53,51 @@ int main(){
         printf("\033[0;32mALL TESTS PASSED\033[0m\n");
     #endif
 
-    signal(SIGINT, handleSIGINT);
+    signal(SIGINT, SIGINTHandler);
 
-    pthread_create(&readerThread, NULL, readerFunction, NULL);
-    pthread_create(&analyzerThread, NULL, analyzerFunction, NULL);
-    pthread_create(&printerThread, NULL, printerFunction, NULL);
+    if(pthread_create(&readerThread, NULL, readerFunction, NULL)){
+        #ifdef DEBUG
+            printf("Error creating reader thread.\n");
+        #endif
+        return 1;
+    }
+    if(pthread_create(&analyzerThread, NULL, analyzerFunction, NULL)){
+        #ifdef DEBUG
+            printf("Error creating analyzer thread.\n");
+        #endif
+        return 1;
+    }
+    if(pthread_create(&printerThread, NULL, printerFunction, NULL)){
+        #ifdef DEBUG
+            printf("Error creating printer thread.\n");
+        #endif
+        return 1;
+    }
+    if(pthread_create(&watchdogThread, NULL, watchdog, NULL)){
+        #ifdef DEBUG
+            printf("Error creating watchdog thread.\n");
+        #endif
+        return 1;
+    }
 
     pthread_join(readerThread, NULL);
     pthread_join(analyzerThread, NULL);
     pthread_join(printerThread, NULL);
+    pthread_join(watchdogThread, NULL);
     
-
     for (int i = 0; i < BUFFER_SIZE; i++) {
-        free(CPU_stateBuffer.buffer[i].cores);
+        free(buffer.data[i].cores);
     }
 
-    free(usageTracker.current->cores);
-    free(usageTracker.prev->cores);
-    free(usageTracker.current);
-    free(usageTracker.prev);
-    free(usageTracker.coreValue);
+    pthread_mutex_destroy(&watchdog_mtx);
+    pthread_mutex_destroy(&buffer.access_mtx);
+
+    if (data != NULL) {
+        #ifdef DEBUG
+            printf("File closed at exit.\n");
+        #endif
+        fclose(data);
+    }
+
     return 0;
 }

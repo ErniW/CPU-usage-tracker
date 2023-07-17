@@ -8,7 +8,8 @@ SRCS += src/reader/reader.c
 SRCS += src/analyzer/analyzer.c
 SRCS += src/printer/printer.c
 SRCS += src/queue/queue.c
-SRCS += src/utils/utils.c
+SRCS += src/utils/watchdog.c
+SRCS += src/utils/sigint.c
 
 
 INCLUDES = -Isrc/cpu/
@@ -29,7 +30,7 @@ endif
 
 compile:
 	$(CC) $(SRCS) $(CFLAGS) $(INCLUDES) -o build/prod/$(PROJECT_NAME).elf -pthread
-	./build/prod/$(PROJECT_NAME).elf
+# ./build/prod/$(PROJECT_NAME).elf
 
 test:
 	$(CC) $(SRCS) $(TESTS) $(CFLAGS) $(INCLUDES) -o build/debug/$(PROJECT_NAME).elf -DDEBUG -pthread

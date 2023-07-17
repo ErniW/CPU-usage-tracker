@@ -1,58 +1,83 @@
 #include "printer.h"
 #include <queue.h>
+#include <watchdog.h>
 
-extern volatile __sig_atomic_t exitFlag;
-extern CPU_usage usageTracker;
-extern Queue CPU_stateBuffer;
+extern CPU_usage usage;
+extern Queue buffer;
 extern int NUM_CORES;
+
+void printerCleanup(void* args){
+    (void)args;
+
+    // pthread_mutex_unlock(&buffer.access_mtx);
+
+    #ifdef DEBUG
+        printf("Printer cleanup done\n");
+    #endif
+}
 
 void* printerFunction(void* args){
     (void)args;
+
+    pthread_cleanup_push(printerCleanup, NULL)
    
-    while(!exitFlag){
+    while(1){
 
-        pthread_mutex_lock(&CPU_stateBuffer.access_mtx);
+        watchdogUpdate(PRINTER_THREAD);
 
-        if(usageTracker.prev != NULL  && usageTracker.current != NULL){
+        pthread_mutex_lock(&buffer.access_mtx);
+
+        if(usage.prev != NULL  && usage.current != NULL){
 
             printf("CPU USAGE TRACKER\n");
-            printf(COLOR_INVERSED "Total: %3lu%%\n" COLOR_CLEAR, usageTracker.total);        
+            printf(COLOR_INVERSED "Total: %3lu%%\n" COLOR_CLEAR, usage.total);        
 
             for(int i=0; i<NUM_CORES; i++){
-                printCoreStats(i, usageTracker.coreValue[i]);
+
+                unsigned int value = usage.value[i];
+
+                char* color = setColor(value);
+
+                printf("CPU %2d: ", i+1);
+                printUsageBar(value, color);
+                printf( "%s%3u%%" COLOR_CLEAR "\n", color, value);
             }
             
             printf(CLEAR_SCREEN);
-
-            free(usageTracker.prev->cores);
-            free(usageTracker.prev);
-            usageTracker.prev = usageTracker.current;
-            usageTracker.current = NULL;
+             
+            free(usage.prev->cores);
+            free(usage.prev);
+            usage.prev = usage.current;
+            usage.current = NULL;
         }
-
-        pthread_mutex_unlock(&CPU_stateBuffer.access_mtx);
-       
+        
+        pthread_mutex_unlock(&buffer.access_mtx); 
         sleep(1);
     }
+   
+    pthread_cleanup_pop(1);
 
     pthread_exit(NULL);
 }
 
-void printCoreStats(int i, unsigned int usage){
-    unsigned long barLength = usage / 10;
-    char color[6] = "";
+char* setColor(unsigned int value){
+    if(value < 40)
+        return COLOR_GREEN;
+    else if(value < 80) 
+        return COLOR_YELLOW;
+    else
+        return COLOR_RED;
+}
+
+void printUsageBar(unsigned int value, char* color){
+    unsigned long barLength = value / 10;
     char bar[11] = "";
 
-    if(usage >= 5 && usage != 100) barLength += 1;
+    if(value >= 5 && value != 100) 
+        barLength += 1;
 
     memset(bar, ' ', sizeof(bar)-1);
     memset(bar, '=', barLength);
 
-    if(barLength <= 3)      strcpy(color, COLOR_GREEN);
-    else if(barLength <=7)  strcpy(color, COLOR_YELLOW);
-    else                    strcpy(color, COLOR_RED);
-
-    printf("CPU %2d: ", i+1);
     printf("[%s%10s" COLOR_CLEAR "]", color, bar);
-    printf( "%s%3u%%" COLOR_CLEAR "\n", color, usage);
 }

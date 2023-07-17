@@ -5,3 +5,4 @@
 #include <semaphore.h>
 
 void* readerFunction(void* args);
+void readerCleanup(void* args);

@@ -46,16 +46,18 @@ void should_compute_cpu_usage(void){
 void should_return_correct_parsed_cpu_state_struct(void){
 
     CPU_state state;
+    FILE* data = fopen("/proc/stat", "r");
 
     state.cores = malloc(sizeof(CPU_core) * (unsigned long)NUM_CORES);
     
-    CPU_readUsage(&state);
+    CPU_readUsage(&state, data);
 
     assert(state.total.id == -1);
     for(int i=0; i<NUM_CORES; i++){
         assert(state.cores[i].id == i);
     }
-    
+
+    fclose(data);
     free(state.cores);
 
     printf("TEST PASSED: should_return_correct_parsed_cpu_state_struct\n");

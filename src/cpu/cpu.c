@@ -2,18 +2,16 @@
 
 extern int NUM_CORES;
 
-void CPU_readUsage(CPU_state* state){
-    FILE* data = fopen("/proc/stat", "r");
+void CPU_usage_init(CPU_usage* usage){
+    usage->prev = NULL;
+    usage->current = NULL;
+    usage->value = (unsigned int*)malloc((unsigned long)NUM_CORES * sizeof(unsigned int));
+}
+
+void CPU_readUsage(CPU_state* state, FILE* data){
     char line[256];
 
-    if(data == NULL){
-        perror("Error opening file");
-        fclose(data);
-        return;
-    }
-
     while(fgets(line, sizeof(line), data) != NULL && strncmp(line, "cpu", 3) == 0){
-        // printf("%s", line);
 
         CPU_core core = CPU_parseUsage(line);
 
@@ -25,8 +23,6 @@ void CPU_readUsage(CPU_state* state){
         }
 
     }
-
-    fclose(data);
 }
 
 CPU_core CPU_parseUsage(char* line){
@@ -55,18 +51,18 @@ CPU_core CPU_parseUsage(char* line){
     return core;
 }
 
-void copy_CPU_state(CPU_state** n, CPU_state* s) {
-    *n = (CPU_state*)malloc(sizeof(CPU_state));
-    (*n)->cores = (CPU_core*)malloc((unsigned long)NUM_CORES * sizeof(CPU_core));
+void copy_CPU_state(CPU_state** copy, CPU_state* src) {
+    *copy = (CPU_state*)malloc(sizeof(CPU_state));
+    (*copy)->cores = (CPU_core*)malloc((unsigned long)NUM_CORES * sizeof(CPU_core));
 
     for(int i=0; i<NUM_CORES; i++){
-        (*n)->cores[i] = s->cores[i]; 
+        (*copy)->cores[i] = src->cores[i]; 
     }
 
-    (*n)->total = s->total;
+    (*copy)->total = src->total;
 }
 
-unsigned int CPU_getAverageUsage(CPU_core *prev, CPU_core *next){
+unsigned int CPU_getAverageUsage(CPU_core *prev, CPU_core *current){
 
     unsigned int cpuPercentage = 0;
 
@@ -78,13 +74,13 @@ unsigned int CPU_getAverageUsage(CPU_core *prev, CPU_core *next){
                                 + prev->softirq
                                 + prev->steal;
 
-    unsigned long currentIdle   = next->idle + next->iowait;
-    unsigned long currentActive = next->user
-                                + next->nice
-                                + next->system
-                                + next->irq
-                                + next->softirq
-                                + next->steal;
+    unsigned long currentIdle   = current->idle + current->iowait;
+    unsigned long currentActive = current->user
+                                + current->nice
+                                + current->system
+                                + current->irq
+                                + current->softirq
+                                + current->steal;
 
     unsigned long prevTotal     = prevIdle + prevActive;
     unsigned long currentTotal  = currentIdle + currentActive;
