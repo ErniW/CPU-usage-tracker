@@ -6,6 +6,9 @@
 extern CPU_usage usageTracker;
 extern Queue CPU_stateBuffer;
 
+extern FILE* data;
+FILE* data = NULL;
+
 void readerCleanup(void* args) {
     FILE* file = (FILE*)args;
 
@@ -36,7 +39,7 @@ void readerCleanup(void* args) {
 }
 
 void* readerFunction(void* args){
-    FILE* data = NULL;
+    
     (void)args;
     
     pthread_cleanup_push(readerCleanup, data)

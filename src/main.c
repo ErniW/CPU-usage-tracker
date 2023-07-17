@@ -21,6 +21,7 @@ extern pthread_t analyzerThread;
 extern pthread_t printerThread;
 extern pthread_t watchdogThread;
 extern int NUM_CORES;
+extern FILE* data;
 
 extern pthread_mutex_t watchdog_mtx;
 
@@ -62,16 +63,21 @@ int main(){
     pthread_create(&printerThread, NULL, printerFunction, NULL);
     pthread_create(&watchdogThread, NULL, watchdog, NULL);
 
-
-
     pthread_join(readerThread, NULL);
     pthread_join(analyzerThread, NULL);
     pthread_join(printerThread, NULL);
     pthread_join(watchdogThread, NULL);
     
-
     for (int i = 0; i < BUFFER_SIZE; i++) {
         free(CPU_stateBuffer.buffer[i].cores);
     }
+
+    if (data != NULL) {
+        #ifdef DEBUG
+            printf("File closed at exit.\n");
+        #endif
+        fclose(data);
+    }
+
     return 0;
 }
